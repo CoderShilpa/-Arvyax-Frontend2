@@ -8,7 +8,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchPublicSessions = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/sessions");
+        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/sessions`);
         const data = await res.json();
         if (res.ok) setSessions(data);
       } catch (err) {
