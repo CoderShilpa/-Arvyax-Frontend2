@@ -11,10 +11,10 @@ function SessionEditor() {
 
   const timerRef = useRef(null);
   const intervalRef = useRef(null);
-  const { id } = useParams(); // <-- for edit mode
+  const { id } = useParams();
   const token = localStorage.getItem("token");
 
-  // Fetch session if editing
+  // ✅ Fetch session if editing
   useEffect(() => {
     const fetchSession = async () => {
       if (!id) return;
@@ -47,10 +47,17 @@ function SessionEditor() {
     fetchSession();
   }, [id]);
 
+  // ✅ Handles both create & update
   const saveDraft = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/my-sessions/save-draft", {
-        method: "POST",
+      const endpoint = id
+        ? `http://localhost:4000/api/my-sessions/${id}`
+        : "http://localhost:4000/api/my-sessions/save-draft";
+
+      const method = id ? "PUT" : "POST";
+
+      const res = await fetch(endpoint, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -65,13 +72,13 @@ function SessionEditor() {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success("Draft auto-saved!");
+        toast.success(id ? "Session updated!" : "Draft saved!");
       } else {
-        toast.error(data.msg || "Failed to auto-save");
+        toast.error(data.msg || "Failed to save");
       }
     } catch (error) {
-      toast.error("Auto-save failed");
-      console.error("❌ Auto-save error:", error);
+      toast.error("Save failed");
+      console.error("❌ Save error:", error);
     }
   };
 
@@ -110,7 +117,7 @@ function SessionEditor() {
     }
   };
 
-  // Auto-save after 5s of inactivity
+  // ✅ Auto-save after 5s of inactivity
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
 
@@ -121,7 +128,7 @@ function SessionEditor() {
     return () => clearTimeout(timerRef.current);
   }, [title, tags, jsonUrl]);
 
-  // Auto-save every 30s
+  // ✅ Auto-save every 30s
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       saveDraft();
